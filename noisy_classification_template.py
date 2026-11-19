@@ -87,7 +87,15 @@ def repair_labels_knn(train_features, noisy_labels, neighbors):
         neighbor_labels = noisy_labels[neighbor_indices]
 
         # compute every repaired label from the same original noisy-label array, rather than modifying labels sequentially.
-        repaired_labels[i] = 1 if np.sum(neighbor_labels) > 0 else -1
+        label_sum = np.sum(neighbor_labels)
+
+        # tie-breaking rule: if a tie occurs, use the original noisy label.
+        if label_sum > 0:
+            repaired_labels[i] = 1
+        elif label_sum < 0:
+            repaired_labels[i] = -1
+        else:
+            repaired_labels[i] = noisy_labels[i]
     # return the repaired labels
     return repaired_labels
 

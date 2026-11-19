@@ -87,33 +87,54 @@ def run_experiments(output_dir, seed=0, max_iterations=100):
 
     # run kmeans for every value in K_VALUES.
     for k in K_VALUES:
-        initial_centroids = get_initial_clusters(k, data, rng)
+        # keep track of the best inertia
+        best_inertia = float("inf")
+        best_centroids = None
+        best_assignments = None
 
-        centroids, assignments = kmeans(
-            data, initial_centroids, max_iterations
-        )
+        # run algorithm 10 times, keeping track of the lowest inertia and its centroids + assignments
+        for _ in range(10):
+            initial_centroids = get_initial_clusters(k, data, rng)
 
-        plt.figure(figsize=(8, 6))
+            centroids, assignments = kmeans(
+                data, initial_centroids, max_iterations
+            )
 
-        plt.scatter(
-            data[:, 0], data[:, 1],
-            c=assignments, cmap="tab10",
-            s=8, alpha=0.6
-        )
+            inertia = np.sum(
+                (data - centroids[assignments]) ** 2
+            )
 
-        plt.scatter(
-            centroids[:, 0], centroids[:, 1],
-            c="black", marker="X",
-            s=180, label="Centroids"
-        )
-        # plot each set of cluster assignments and its final centroids.
-        plt.title(f"K-means clustering (k={k})")
-        plt.xlabel("Feature 1")
-        plt.ylabel("Feature 2")
-        plt.legend()
-        # save plots under output_dir and discuss the effect of k.
-        plt.savefig(output_dir / f"kmeans_k{k}.png", dpi=150)
-        plt.close()
+            if inertia < best_inertia:
+                best_inertia = inertia
+                best_centroids = centroids
+                best_assignments = assignments
+
+        centroids = best_centroids
+        assignments = best_assignments
+        plot_clusters(data, centroids, assignments, k, output_dir)
+
+def plot_clusters(data, centroids, assignments, k, output_dir):
+    plt.figure(figsize=(8, 6))
+
+    plt.scatter(
+        data[:, 0], data[:, 1],
+        c=assignments, cmap="tab10",
+        s=8, alpha=0.6
+    )
+
+    plt.scatter(
+        centroids[:, 0], centroids[:, 1],
+        c="black", marker="X",
+        s=180, label="Centroids"
+    )
+    # plot each set of cluster assignments and its final centroids.
+    plt.title(f"K-means clustering (k={k})")
+    plt.xlabel("Feature 1")
+    plt.ylabel("Feature 2")
+    plt.legend()
+    # save plots under output_dir and discuss the effect of k.
+    plt.savefig(output_dir / f"kmeans_k{k}.png", dpi=150)
+    plt.close()
 
 
 def main():

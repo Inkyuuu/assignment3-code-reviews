@@ -72,7 +72,7 @@ def derive_svm_separator():
     # determine the geometric margin and state its meaning
     geometric_margin = 1 / np.linalg.norm(weights)
     # the geometric margin is the euclidean distance between the cloeset point on the
-    # maximum-margin separating line and the support vectors.
+    # maximum-margin separating line and the support vectors, approx 0.3536. 
     return (weights, bias, geometric_margin)
 
 def main():
